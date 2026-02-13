@@ -249,9 +249,12 @@ def visualize_motifs(intron_list: list, exon_list: list, motifs_seen: list, head
     """
     # Create the cairo surface and context, and set the background to white, as well as determine the adjustment index for spacing out the introns and exons based on the number of reads (headers) we have
     reads = len(header_list)
-    adjustment_idx: int = int(1000 / (reads - 1))
+    read_allocation = reads * 75
+    legend_adjustment_idx = 150 / len(motif_colors)
+    adjustment_idx: int = int(read_allocation / (reads - 1))
+    figure_hght = read_allocation + 300
     figure_name = filename.replace(".", "_")
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,1200,1500)
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,1200,figure_hght)
     ctx = cairo.Context(surface)
     ctx.set_source_rgb(1,1,1)
     ctx.rectangle(0,0,1200,1500)
@@ -323,14 +326,13 @@ def visualize_motifs(intron_list: list, exon_list: list, motifs_seen: list, head
         ctx.move_to(header.x_cord, header.y_cord + ((adjustment_idx * (header.header_idx - 1))))
         ctx.show_text(f'{header.name}')
 
-    legend_adjustment_idx = 300 / len(motif_colors)
     legend_ct = 0
 
     for motif in sorted(motif_colors.keys()):
         # Draws a legend for the motifs on the left side of the figure, with a colored rectangle and label for each motif
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         ctx.set_font_size(max(8, legend_adjustment_idx - 5))
-        y = 1200 + (legend_ct * legend_adjustment_idx)
+        y = 150 + read_allocation + (legend_ct * legend_adjustment_idx)
         x = 25
         ctx.set_source_rgb(*motif_colors[motif])
         ctx.rectangle(x, y, 25, max(8, legend_adjustment_idx - 5))              
