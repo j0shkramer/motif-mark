@@ -237,6 +237,7 @@ def read_fasta(fasta_life:str, intron_list: list, exon_list: list, motifs_seen: 
             regex_motif = ""
             for base in motif:
                 regex_motif += IUPAC_TO_REGEX[base]
+            regex_motif = f'(?={regex_motif})'
             regex_motif = re.compile(regex_motif)
             motif_hits = re.finditer(regex_motif, read)
             motifs_seen = process_motif(motifs_seen, read_ct, motif_colors, motif_hits, motif)
@@ -274,7 +275,7 @@ def visualize_motifs(intron_list: list, exon_list: list, motifs_seen: list, head
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        ctx.set_font_size(12)
+        ctx.set_font_size(15)
         pivot_x = intron.start
         pivot_y = y
         ctx.translate(pivot_x, pivot_y)
@@ -298,7 +299,7 @@ def visualize_motifs(intron_list: list, exon_list: list, motifs_seen: list, head
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        ctx.set_font_size(12)
+        ctx.set_font_size(15)
         pivot_x = exon.start
         pivot_y = y
         ctx.translate(pivot_x, pivot_y)
@@ -308,15 +309,41 @@ def visualize_motifs(intron_list: list, exon_list: list, motifs_seen: list, head
         ctx.show_text(f"{base_pair_idx}")
         ctx.restore() 
 
-    for motif in motifs_seen:
-        # Draws a rectangle for each motif, with the appropriate color and label
+    prev_x_cord_end = 0
+    prev_header_idx = 0
+    overlap_idx = 0
+    # Draws a rectangle for each motif, with the appropriate color and label
+    for motif in sorted(motifs_seen, key=lambda m: (m.header_idx, m.x_cord)):
         red, green, blue = motif.color
-        ctx.set_source_rgba(red, green, blue, 0.75)
-        ctx.rectangle(motif.x_cord, 
-                      (motif.y_cord + (adjustment_idx * (motif.header_idx - 1))) - 15,
-                      len(motif.binding_motif),
-                      30)
-        ctx.fill()
+        if prev_header_idx != motif.header_idx:
+            overlap_idx = 0
+        if motif.x_cord < prev_x_cord_end and overlap_idx % 2 == 0:
+            # Create a stagger effect for overlaping motifs depending on the number of overlaps seen in this read
+            ctx.set_source_rgba(red, green, blue, 0.75)
+            ctx.rectangle(motif.x_cord, 
+                        (motif.y_cord + (adjustment_idx * (motif.header_idx - 1))) - 15,
+                        len(motif.binding_motif),
+                        30)
+            ctx.fill()
+            overlap_idx += 1
+        elif motif.x_cord < prev_x_cord_end and overlap_idx % 2 == 1:
+            ctx.set_source_rgba(red, green, blue, 0.75)
+            ctx.rectangle(motif.x_cord, 
+                        (motif.y_cord + (adjustment_idx * (motif.header_idx - 1))) - 20,
+                        len(motif.binding_motif),
+                        30)
+            ctx.fill()
+            overlap_idx += 1
+        else:
+            ctx.set_source_rgba(red, green, blue, 0.75)
+            ctx.rectangle(motif.x_cord, 
+                        (motif.y_cord + (adjustment_idx * (motif.header_idx - 1))) - 15,
+                        len(motif.binding_motif),
+                        30)
+            ctx.fill()
+
+        prev_header_idx = motif.header_idx
+        prev_x_cord_end = motif.x_cord + len(motif.binding_motif)
 
     for header in header_list:
         # Draws the header labels on the left side of the figure, aligned with its corresponding introns and exons
