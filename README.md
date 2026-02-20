@@ -5,6 +5,8 @@ Given a FASTA file and a list of sequence motifs, the script identifies where ea
 
 This tool is useful for quickly examining regulatory elements such as exonic splicing enhancers (ESEs), intronic splicing silencers (ISSs), and other short binding motifs that influence exon inclusion.
 
+This program requires a `python ≥ 3.10` environment with `PyCairo 1.29.0`
+
 ## Features
 
 - Identifies motifs in DNA sequences provided as FASTA.
