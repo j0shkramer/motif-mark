@@ -27,5 +27,8 @@ This program requires a `python ≥ 3.10` environment with `PyCairo 1.29.0`
     - IUPAC degenerate bases are supported (Y, N, -, X, etc.)
 
 ## Using motif-mark
-
-python motif-mark-oop.py -f <your_fasta_file> -m <motif_file>
+```bash
+python motif-mark-oop.py \
+    -f <your_fasta_file>  \
+    -m <motif_file>
+```
