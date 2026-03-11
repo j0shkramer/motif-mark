@@ -7,6 +7,10 @@ This tool is useful for quickly examining regulatory elements such as exonic spl
 
 This program requires a `python ≥ 3.10` environment with `PyCairo 1.29.0`
 
+## Example output
+
+![example](/Output_Figures/Figure_1_fasta.png)
+
 ## Features
 
 - Identifies motifs in DNA sequences provided as FASTA.
